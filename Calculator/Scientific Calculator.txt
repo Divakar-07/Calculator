@@ -1,0 +1,300 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f2f5;
+        }
+
+        .calculator {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+
+        .display {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: right;
+            font-size: 24px;
+            height: 70px;
+            overflow: hidden;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        button {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            background: #e9ecef;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .mode-display {
+            grid-column: span 5;
+            text-align: center;
+            padding: 5px;
+            background: #f8f9fa;
+            margin-bottom: 5px;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .operator { background: #ff9500; color: white; }
+        .equals { background: #007bff; color: white; }
+        .clear { background: #dc3545; color: white; }
+        .function { background: #17a2b8; color: white; }
+        .trig { background: #98faaf; color: rgb(10, 9, 9); }
+
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display">0</div>
+        <div class="mode-display">DEG</div>
+        <div class="buttons">
+            <!-- Functions Row -->
+            <button class="function" onclick="handleFunction('π')">π</button>
+            <button class="function" onclick="handleFunction('e')">e</button>
+            <button class="function" onclick="handleFunction('^')">x^y</button>
+            <button class="function" onclick="handleFunction('√')">√</button>
+            <button class="function" onclick="handleFunction('mod')">MOD</button>
+
+            <!-- Trigonometry Row -->
+            <select id="trigMode" onchange="updateTrigMode()">
+                <option value="normal">Trig</option>
+                <option value="inverse">Inv</option>
+            </select>
+            <button class="trig" onclick="handleTrig('sin')">sin</button>
+            <button class="trig" onclick="handleTrig('cos')">cos</button>
+            <button class="trig" onclick="handleTrig('tan')">tan</button>
+            <button class="function" onclick="handleFunction('rand')">RAND</button>
+
+            <!-- Advanced Functions Row -->
+            <button class="function" onclick="handleFunction('log')">log</button>
+            <button class="function" onclick="handleFunction('ln')">ln</button>
+            <button class="function" onclick="handleFunction('10^x')">10^x</button>
+            <button class="function" onclick="handleFunction('e^x')">e^x</button>
+            <button class="function" onclick="handleFunction('!')">n!</button>
+
+            <!-- Main Calculator Buttons -->
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button onclick="appendToDisplay('(')">(</button>
+            <button onclick="appendToDisplay(')')">)</button>
+            <button class="operator" onclick="appendToDisplay('/')">/</button>
+            <button class="function" onclick="handleFunction('DMS')">DMS</button>
+            
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button class="operator" onclick="appendToDisplay('*')">×</button>
+            <button class="function" onclick="handleFunction('deg')">DEG</button>
+            
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button class="operator" onclick="appendToDisplay('-')">-</button>
+            <button class="function" onclick="angleModeToggle()">RAD</button>
+            
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button class="operator" onclick="appendToDisplay('+')">+</button>
+            <button class="function" onclick="handleFunction('1/x')">1/x</button>
+            
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="deleteLastChar()">⌫</button>
+            <button class="equals" onclick="calculate()">=</button>
+            <button class="function" onclick="handleFunction('%')">%</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.querySelector('.display');
+        let currentExpression = '0';
+        let angleMode = 'DEG'; // DEG or RAD
+        let trigMode = 'normal'; // normal or inverse
+
+        function updateDisplay() {
+            display.textContent = currentExpression || '0';
+            document.querySelector('.mode-display').textContent = angleMode;
+        }
+
+        function appendToDisplay(value) {
+            if (currentExpression === '0' && !['.', '%'].includes(value)) {
+                currentExpression = '';
+            }
+            currentExpression += value;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentExpression = '0';
+            updateDisplay();
+        }
+
+        function deleteLastChar() {
+            currentExpression = currentExpression.slice(0, -1);
+            if (currentExpression === '') currentExpression = '0';
+            updateDisplay();
+        }
+
+        function angleModeToggle() {
+            angleMode = angleMode === 'DEG' ? 'RAD' : 'DEG';
+            updateDisplay();
+        }
+
+        function updateTrigMode() {
+            trigMode = document.getElementById('trigMode').value;
+        }
+
+        function factorial(n) {
+            if (n < 0) throw 'Error';
+            return n <= 1 ? 1 : n * factorial(n - 1);
+        }
+
+        function handleTrig(func) {
+            let value = parseFloat(currentExpression);
+            if (angleMode === 'DEG' && trigMode === 'normal') {
+                value = value * Math.PI / 180;
+            }
+            
+            let result;
+            switch(func) {
+                case 'sin': result = Math.sin(value); break;
+                case 'cos': result = Math.cos(value); break;
+                case 'tan': result = Math.tan(value); break;
+            }
+
+            if (trigMode === 'inverse') {
+                result = Math[`a${func}`](result);
+                if (angleMode === 'DEG') result *= 180 / Math.PI;
+            }
+
+            currentExpression = result.toString();
+            updateDisplay();
+        }
+
+        function handleFunction(func) {
+            switch(func) {
+                case 'π': appendToDisplay(Math.PI.toString()); break;
+                case 'e': appendToDisplay(Math.E.toString()); break;
+                case 'mod': appendToDisplay('%'); break;
+                case '!': 
+                    currentExpression = factorial(parseFloat(currentExpression)).toString();
+                    updateDisplay();
+                    break;
+                case '√': 
+                    currentExpression = `Math.sqrt(${currentExpression})`;
+                    calculate();
+                    break;
+                case '^': appendToDisplay('^'); break;
+                case 'log': 
+                    currentExpression = `Math.log10(${currentExpression})`;
+                    calculate();
+                    break;
+                case 'ln': 
+                    currentExpression = `Math.log(${currentExpression})`;
+                    calculate();
+                    break;
+                case '10^x': 
+                    currentExpression = `Math.pow(10, ${currentExpression})`;
+                    calculate();
+                    break;
+                case 'e^x': 
+                    currentExpression = `Math.exp(${currentExpression})`;
+                    calculate();
+                    break;
+                case 'DMS':
+                    let deg = parseFloat(currentExpression);
+                    let d = Math.floor(deg);
+                    let m = Math.floor((deg - d) * 60);
+                    let s = ((deg - d - m/60) * 3600).toFixed(2);
+                    currentExpression = `${d}°${m}'${s}"`;
+                    updateDisplay();
+                    break;
+                case 'deg':
+                    let [degrees, minutes, seconds] = currentExpression.split(/[°'"]/);
+                    let decimal = parseFloat(degrees) + parseFloat(minutes)/60 + parseFloat(seconds)/3600;
+                    currentExpression = decimal.toString();
+                    updateDisplay();
+                    break;
+                case 'rand':
+                    currentExpression = Math.random().toString();
+                    updateDisplay();
+                    break;
+                case '1/x':
+                    currentExpression = `1/(${currentExpression})`;
+                    calculate();
+                    break;
+                case '%':
+                    currentExpression = `(${currentExpression})/100`;
+                    calculate();
+                    break;
+            }
+        }
+
+        function calculate() {
+            try {
+                // Replace caret (^) with pow operator
+                let expression = currentExpression.replace(/\^/g, '**');
+                // Handle implied multiplication for parentheses
+                expression = expression.replace(/(\d)(\()/g, '$1*$2');
+                currentExpression = eval(expression).toString();
+                updateDisplay();
+            } catch (error) {
+                currentExpression = 'Error';
+                updateDisplay();
+                setTimeout(clearDisplay, 1500);
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+            if (key >= '0' && key <= '9' || key === '.' || key === '+' || key === '-' || key === '*' || key === '/' || key === '(' || key === ')') {
+                appendToDisplay(key);
+            } else if (key === 'Enter') {
+                calculate();
+            } else if (key === 'Backspace') {
+                deleteLastChar();
+            } else if (key === 'Escape') {
+                clearDisplay();
+            }
+        });
+    </script>
+</body>
+</html>
